@@ -69,7 +69,9 @@ void commSetup() {
 }
 
 void sendData(const char * topic, char * data, bool retain) {
+    digitalWrite(INFO_LED, HIGH);
     if (mqttClient.connect(MQTT_ID, MQTT_USER, MQTT_PASS, MQTT_TOPIC_WILL, 0, true, "0")) {
         mqttClient.publish(topic, data, retain);
     }
+    digitalWrite(INFO_LED, LOW);
 }
