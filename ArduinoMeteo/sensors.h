@@ -6,7 +6,7 @@ BME280 bme;
 Adafruit_MCP9808 tempsensor;
 MovingAverage <int16_t, 8> tempFilter;
 MovingAverage <int16_t, 8> humidityFilter;
-MovingAverage <int32_t, 8> pressureFilter;
+MovingAverage <int32_t, 16> pressureFilter;
 
 void sensorSetup() {
     bme.setI2CAddress(BME_I2C_ADDRESS);
@@ -21,10 +21,11 @@ void sensorSetup() {
     }
 
     bme.setMode(MODE_NORMAL);
+    bme.setStandbyTime(5);  // 1000ms
+    bme.setFilter(1);
     bme.setTempOverSample(8);
     bme.setHumidityOverSample(8);
-    bme.setPressureOverSample(16);
-    bme.setReferencePressure(REFERENCE_PRESSURE);
+    bme.setPressureOverSample(8);
 
     if (!tempsensor.begin(MCP9808_I2C_ADDRESS, &I2C)) {
 #if defined(ENABLE_DEBUG)

@@ -2,12 +2,11 @@
 #define MCP9808_I2C_ADDRESS 0x18
 
 #define DEF_ALTITUDE 408.0  // floating point here
-#define REFERENCE_PRESSURE 106232  // https://keisan.casio.com/exec/system/1224575267
 
 #define INFO_LED LED_BUILTIN
 
 #define SENSORS_SEND_INTERVAL 120000  // ms
-#define SENSORS_READ_INTERVAL 2000  // ms
+#define SENSORS_READ_INTERVAL 1000  // ms
 #define METERS_SEND_INTERVAL 256  // sec
 #define MQTT_STATUS_SEND_INTERVAL 45000  // ms
 
