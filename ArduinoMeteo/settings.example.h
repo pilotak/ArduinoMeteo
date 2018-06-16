@@ -2,6 +2,7 @@
 #define MCP9808_I2C_ADDRESS 0x18
 
 #define DEF_ALTITUDE 408.0  // floating point here
+#define REFERENCE_PRESSURE 106232  // https://keisan.casio.com/exec/system/1224575267
 
 #define INFO_LED LED_BUILTIN
 
