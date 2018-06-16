@@ -36,7 +36,7 @@ SOFTWARE.
     #define I2C Wire
 #endif
 
-void sendData(const char * topic, char * data, bool retain = false);  // compiler workaround
+void sendData(const char * topic, char * data, bool retain = false); // compiler workaround
 
 #include "sensors.h"
 #include "meters.h"
@@ -47,7 +47,9 @@ void sendData(const char * topic, char * data, bool retain = false);  // compile
     #include "wifi.h"
 #endif
 
-long previousMillis, previousWillMillis;
+uint32_t previousSendMillis = 0;
+uint32_t previousWillMillis = 0;
+uint32_t previousReadMillis = 0;
 
 void setup() {
     wdtSetup();
@@ -67,27 +69,34 @@ void setup() {
     setupMeters();
     commSetup();
 
-    previousMillis = previousWillMillis = millis();
+    previousSendMillis = previousWillMillis = millis();
 }
 
 void loop() {
-    if (millis() - previousMillis >= SENSORS_SEND_INTERVAL) {
-        previousMillis = millis();
+    if (got_meters_data) {
+        got_meters_data = false;
+        readMetersData();
+    }
+
+    if (millis() - previousReadMillis >= SENSORS_READ_INTERVAL) {
+        previousReadMillis = millis();
         readSensors();
 
         iwdg_feed();
     }
 
-    if (millis() - previousWillMillis >= MQTT_WILL_SEND_INTERVAL) {
+    if (millis() - previousWillMillis >= MQTT_STATUS_SEND_INTERVAL) {
         previousWillMillis = millis();
-        sendData(MQTT_TOPIC_WILL, "1", true);
+        sendData(MQTT_TOPIC_WILL, MQTT_STATE_ON, true);
 
         iwdg_feed();
     }
 
-    if (got_meters_data) {
-        got_meters_data = false;
-        readMetersData();
+    if (millis() - previousSendMillis >= SENSORS_SEND_INTERVAL) {
+        previousSendMillis = millis();
+        sendSensors();
+
+        iwdg_feed();
     }
 
     iwdg_feed();

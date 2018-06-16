@@ -32,7 +32,7 @@ void setupMeters() {
     rtclock.attachSecondsInterrupt(secondCount);
 #elif defined(__AVR__)
     Timer1.initialize(1000000);  // initialize timer1, and set a 1 second period
-    Timer1.attachInterrupt(secondCount);  // attaches callback() as a timer overflow interrupt
+    Timer1.attachInterrupt(secondCount);
 #endif
 
     attachInterrupt(digitalPinToInterrupt(anemometer_pin), intAnemometer, FALLING);

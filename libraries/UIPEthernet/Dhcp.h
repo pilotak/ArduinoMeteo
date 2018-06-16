@@ -44,7 +44,7 @@
 #define MAGIC_COOKIE		0x63825363
 #define MAX_DHCP_OPT	16
 
-#define HOST_NAME "ENC28J"
+#define HOST_NAME "METEO-"
 #define DEFAULT_LEASE	(900) //default lease time in seconds
 #define DHCP_TIMEOUT            60000
 #define DHCP_RESPONSE_TIMEOUT   4000

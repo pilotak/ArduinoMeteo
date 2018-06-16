@@ -64,14 +64,19 @@ void commSetup() {
     // setup mqtt client
     mqttClient.setClient(ethClient);
     mqttClient.setServer(MQTT_HOST, MQTT_PORT);
+    mqttClient.connect(MQTT_ID, MQTT_USER, MQTT_PASS, MQTT_TOPIC_WILL, 0, true, MQTT_STATE_OFF);
 
-    sendData(MQTT_TOPIC_WILL, "1", true);
+    sendData(MQTT_TOPIC_WILL, MQTT_STATE_ON, true);
 }
 
 void sendData(const char * topic, char * data, bool retain) {
     digitalWrite(INFO_LED, HIGH);
-    if (mqttClient.connect(MQTT_ID, MQTT_USER, MQTT_PASS, MQTT_TOPIC_WILL, 0, true, "0")) {
-        mqttClient.publish(topic, data, retain);
+
+    if (!mqttClient.connected()) {
+        mqttClient.connect(MQTT_ID, MQTT_USER, MQTT_PASS, MQTT_TOPIC_WILL, 0, true, MQTT_STATE_OFF);
+        sendData(MQTT_TOPIC_WILL, MQTT_STATE_ON, true);
     }
+
+    mqttClient.publish(topic, data, retain);
     digitalWrite(INFO_LED, LOW);
 }
