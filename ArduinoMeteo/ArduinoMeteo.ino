@@ -20,31 +20,13 @@ SOFTWARE.
 
 #include <Wire.h>
 #include "settings.h"
+#include "hw.h"
 #include "watchdog.h"
 
-#if defined(ENABLE_DEBUG)
-    #define debugPort Serial2
-#endif
-
-#if HW_VER == 1
-    TwoWire I2C(2, I2C_FAST_MODE); // use second I2C
-
-#elif HW_VER == 2
-    TwoWire I2C(1, I2C_FAST_MODE);
-
-#elif defined(__AVR__)
-    #define I2C Wire
-#endif
-
-void sendData(const char * topic, char * data, bool retain = false); // compiler workaround
-
 #include "sensors.h"
-#include "meters.h"
 
-#if !defined(WIFI)
-    #include "ethernet.h"
-#else
-    #include "wifi.h"
+#if defined(SENSOR_WEATHER_METERS)
+    #include "meters.h"
 #endif
 
 uint32_t previousSendMillis = 0;
@@ -66,7 +48,11 @@ void setup() {
 #endif
 
     sensorSetup();
+
+#if defined(SENSOR_WEATHER_METERS)
     setupMeters();
+#endif
+
     commSetup();
 
     previousSendMillis = previousWillMillis = millis();

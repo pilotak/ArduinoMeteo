@@ -4,6 +4,8 @@
 EthernetClient ethClient;
 PubSubClient mqttClient;
 
+void sendData(const char * topic, char * data, bool retain = false); // compiler workaround
+
 uint8_t mac[6];
 
 void commSetup() {
@@ -13,7 +15,8 @@ void commSetup() {
      * add #define ENC28J60_CONTROL_CS PA10
      * after line #include "mempool.h"
      * in file Enc28J60Network.h
-     * otherwise PA4 will be used as NSS
+     * otherwise PA4 will be used as NSS.
+     * Automatically done in platform.io compilation
      */
     afio_cfg_debug_ports(AFIO_DEBUG_SW_ONLY);  // release PB3 and PB5
     afio_remap(AFIO_REMAP_SPI1);  // remap SPI1
