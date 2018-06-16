@@ -59,10 +59,14 @@ void setup() {
 }
 
 void loop() {
+#if defined(SENSOR_WEATHER_METERS)
+
     if (got_meters_data) {
         got_meters_data = false;
         readMetersData();
     }
+
+#endif
 
     if (millis() - previousReadMillis >= SENSORS_READ_INTERVAL) {
         previousReadMillis = millis();
