@@ -1,6 +1,8 @@
 #if defined(SENSOR_BME280_HUMIDITY) || defined(SENSOR_BME280_PRESSURE) || defined(SENSOR_BME280_TEMPERATURE)
-    #include "SparkFunBME280.h"
-    BME280 bme;
+    #include <Adafruit_Sensor.h>
+    #include <Adafruit_BME280.h>
+
+    Adafruit_BME280 bme;
 #endif
 
 #if defined(SENSOR_MCP9808)
@@ -15,9 +17,8 @@ MovingAverage <int32_t, 16> pressureFilter;
 
 void sensorSetup() {
 #if defined(SENSOR_BME280_HUMIDITY) || defined(SENSOR_BME280_PRESSURE) || defined(SENSOR_BME280_TEMPERATURE)
-    bme.setI2CAddress(BME_I2C_ADDRESS);
 
-    if (!bme.beginI2C(I2C)) {
+    if (!bme.begin(BME_I2C_ADDRESS, &I2C)) {
 #if defined(ENABLE_DEBUG)
         debugPort.println("Couldn't find BME280 sensor, check wiring!");
 #endif
@@ -26,33 +27,27 @@ void sensorSetup() {
         while (1) {}  // wait for watchdog to reset
     }
 
-    bme.setMode(MODE_NORMAL);
-    bme.setStandbyTime(5);  // 1000ms
-    bme.setFilter(1);
-#if defined(SENSOR_BME280_TEMPERATURE)
-    bme.setTempOverSample(8);
-#endif
-#if defined(SENSOR_BME280_HUMIDITY)
-    bme.setHumidityOverSample(8);
-#endif
-#if defined(SENSOR_BME280_PRESSURE)
-    bme.setPressureOverSample(8);
-#endif
+    bme.setSampling(Adafruit_BME280::MODE_NORMAL,
+                    Adafruit_BME280::SAMPLING_X1,   // temperature
+                    Adafruit_BME280::SAMPLING_X16,   // pressure
+                    Adafruit_BME280::SAMPLING_X2, // humidity
+                    Adafruit_BME280::FILTER_X16,
+                    Adafruit_BME280::STANDBY_MS_0_5 );
 
     // Fake reading to settle up readings and it's oversampling, min repeat should be as high as highest oversampling set
-    for (uint8_t i = 0; i < 8; ++i) {
-#if defined(SENSOR_BME280_TEMPERATURE)
-        bme.readTempC();
-#endif
-#if defined(SENSOR_BME280_HUMIDITY)
-        bme.readFloatHumidity();
-#endif
-#if defined(SENSOR_BME280_PRESSURE)
-        bme.readFloatPressure();
-#endif
+    /*    for (uint8_t i = 0; i < 10; ++i) {
+    #if defined(SENSOR_BME280_TEMPERATURE)
+            bme.readTempC();
+    #endif
+    #if defined(SENSOR_BME280_HUMIDITY)
+            bme.readFloatHumidity();
+    #endif
+    #if defined(SENSOR_BME280_PRESSURE)
+            bme.readFloatPressure();
+    #endif
 
-        delay(200);  // give time to "burn up" sensor
-    }
+            delay(200);  // give time to "burn up" sensor
+        }*/
 
 #endif
 
@@ -74,16 +69,15 @@ void sensorSetup() {
 
 void readSensors() {
 #if defined(SENSOR_BME280_HUMIDITY)
-    humidityFilter.add(static_cast<int16_t>(bme.readFloatHumidity() * 100));
+    humidityFilter.add(static_cast<int16_t>(bme.readHumidity() * 100));
 #endif
 
 #if defined(SENSOR_BME280_PRESSURE)
-    float pressure = (bme.readFloatPressure() / pow(1.0 - (DEF_ALTITUDE / 44330.0), 5.255));
-    pressureFilter.add(static_cast<int32_t>(pressure));
+    pressureFilter.add(static_cast<int32_t>(bme.readPressure()));
 #endif
 
 #if defined(SENSOR_BME280_TEMPERATURE)
-    tempFilter.add(static_cast<int16_t>(bme.readTempC() * 100));
+    tempFilter.add(static_cast<int16_t>(bme.readTemperature() * 100));
 #elif defined(SENSOR_MCP9808)
     tempFilter.add(static_cast<int16_t>(tempsensor.readTempC() * 100));
 #endif
@@ -114,7 +108,9 @@ void sendSensors() {
 #endif
 
 #if defined(SENSOR_BME280_PRESSURE)
-    itoa(pressureFilter.get(), cstr, 10);
+    // Get relative pressure
+    float pressure = (pressureFilter.get() / pow(1.0 - (DEF_ALTITUDE / 44330.0), 5.255));
+    itoa(pressure, cstr, 10);
 
 #if defined(ENABLE_DEBUG)
     debugPort.print("Pressure: ");

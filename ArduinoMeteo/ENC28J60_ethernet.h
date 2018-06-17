@@ -9,7 +9,7 @@ void sendData(const char * topic, char * data, bool retain = false); // compiler
 uint8_t mac[6];
 
 void commSetup() {
-#if HW_VER == 1
+#if defined(BLUEPILL_METEO_V1)
     /*
      * if remaping, change manually NSS pin
      * add #define ENC28J60_CONTROL_CS PA10
